@@ -8,60 +8,64 @@ namespace ECommerce.API.Controllers
     [ApiController]
     public class UsuariosController : ControllerBase
     {
+        private readonly ILogger<UsuariosController> _logger;
         private readonly IUsuarioRepository _repository;
 
-        public UsuariosController(IUsuarioRepository repository)
+        public UsuariosController(ILogger<UsuariosController> logger, IUsuarioRepository repository)
         {
+            _logger = logger;
             _repository = repository;
         }
 
         [HttpGet]
-        public IActionResult GetAll()
+        public async Task<IActionResult> GetAll()
         {
-            var listaUsuarios = _repository.Get();
+            _logger.LogInformation("Listar usuários");
+
+            var listaUsuarios = await _repository.Get();
 
             return Ok(listaUsuarios);
         }
 
         [HttpGet("{id:int}")]
-        public IActionResult GetBy(int id)
+        public async Task<IActionResult> GetBy(int id)
         {
-            var usuario = _repository.Get(id);
+            var usuario = await _repository.Get(id);
 
-            if (usuario == null)
-                return NotFound("Usuário não encontrado.");
-
-            return Ok(usuario);
+            return usuario == null
+                ? NotFound("Usuário não encontrado.")
+                : Ok(usuario);
         }
 
         [HttpPost]
-        public IActionResult Add([FromBody] Usuario usuario)
+        public async Task<IActionResult> Add([FromBody] Usuario usuario)
         {
-            _repository.Add(usuario);
+            await _repository.Add(usuario);
 
             return Ok(usuario);
         }
 
         [HttpPut("{id:int}")]
-        public IActionResult Update(int id, [FromBody] Usuario usuario)
+        public async Task<IActionResult> Update(int id, [FromBody] Usuario usuario)
         {
             if (id != usuario.Id)
                 return BadRequest("Requisição inválida.");
 
-            _repository.Update(usuario);
+            var result = await _repository.Update(usuario)!;
 
-            return Ok(usuario);
+            return result == null
+                ? NotFound("Usuário não encontrado")
+                : Ok(usuario);
         }
 
         [HttpDelete("{id:int}")]
-        public IActionResult Delete(int id)
+        public async Task<IActionResult> Delete(int id)
         {
-            var result = _repository.Delete(id);
+            var result = await _repository.Delete(id);
 
-            if (!result)
-                return NotFound("Usuário não encontrado.");
-
-            return Ok("Usuário removido com sucesso.");
+            return !result
+                ? NotFound("Usuário não encontrado.")
+                : Ok("Usuário removido com sucesso.");
         }
     }
 }

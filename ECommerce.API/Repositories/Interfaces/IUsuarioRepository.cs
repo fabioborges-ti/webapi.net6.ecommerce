@@ -4,10 +4,10 @@ namespace ECommerce.API.Repositories.Interfaces
 {
     public interface IUsuarioRepository
     {
-        List<Usuario> Get();
-        Usuario Get(int id);
-        void Add(Usuario usuario);
-        void Update(Usuario usuario);
-        bool Delete(int id);
+        Task<List<Usuario>> Get();
+        Task<Usuario> Get(int id);
+        Task<Usuario> Add(Usuario usuario);
+        Task<Usuario> Update(Usuario usuario);
+        Task<bool> Delete(int id);
     }
 }
